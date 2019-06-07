@@ -6,19 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>882</width>
-    <height>355</height>
+    <width>1095</width>
+    <height>708</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Geo Rec</string>
+   <string>Train Results</string>
   </property>
   <widget class="QDialogButtonBox" name="button_box">
    <property name="geometry">
     <rect>
-     <x>290</x>
-     <y>260</y>
-     <width>311</width>
+     <x>300</x>
+     <y>620</y>
+     <width>421</width>
      <height>51</height>
     </rect>
    </property>
@@ -35,62 +35,11 @@
     <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="layerComboBox">
-   <property name="geometry">
-    <rect>
-     <x>40</x>
-     <y>70</y>
-     <width>791</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Source Code Variable</family>
-     <pointsize>14</pointsize>
-    </font>
-   </property>
-  </widget>
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>40</x>
-     <y>10</y>
-     <width>811</width>
-     <height>51</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Source Code Variable</family>
-     <pointsize>14</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>Choose the input feature layer data:</string>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="fieldComboBox">
-   <property name="geometry">
-    <rect>
-     <x>40</x>
-     <y>190</y>
-     <width>791</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Source Code Variable</family>
-     <pointsize>14</pointsize>
-    </font>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_2">
-   <property name="geometry">
-    <rect>
-     <x>40</x>
-     <y>130</y>
+     <x>70</x>
+     <y>40</y>
      <width>731</width>
      <height>51</height>
     </rect>
@@ -102,8 +51,38 @@
     </font>
    </property>
    <property name="text">
-    <string>Choose the train target field:</string>
+    <string>Test Accuracy:</string>
    </property>
+  </widget>
+  <widget class="QLineEdit" name="editAcc">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>390</x>
+     <y>50</y>
+     <width>251</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Source Code Variable</family>
+     <pointsize>14</pointsize>
+    </font>
+   </property>
+  </widget>
+  <widget class="QWidget" name="verticalLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>120</y>
+     <width>971</width>
+     <height>471</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="layout"/>
   </widget>
  </widget>
  <resources/>
