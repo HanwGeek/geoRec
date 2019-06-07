@@ -184,7 +184,7 @@ class Georec:
           parent=self.iface.mainWindow())
 
         self.add_action(
-          ':/plugins/georec/icon.png',
+          'D:/Code/QGIS_Plugin/georec/app.png',
           text=self.tr(u'train'),
           callback=self.test,
           parent=self.iface.mainWindow())
