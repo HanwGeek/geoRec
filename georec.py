@@ -180,25 +180,25 @@ class Georec:
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
         self.add_action(
-          'D:/Code/QGIS_Plugin/georec/raster.png',
+          os.path.join(os.path.dirname(__file__), 'raster.png'),
           text=self.tr(u'vector to raster'),
           callback=self.vector_to_raster,
           parent=self.iface.mainWindow())
 
         self.add_action(
-          'D:/Code/QGIS_Plugin/georec/vector.png',
+          os.path.join(os.path.dirname(__file__), 'vector.png'),
           text=self.tr(u'raster to vector'),
           callback=self.raster_to_vector,
           parent=self.iface.mainWindow())
 
         self.add_action(
-          'D:/Code/QGIS_Plugin/georec/train.png',
+          os.path.join(os.path.dirname(__file__), 'train.png'),
           text=self.tr(u'train'),
           callback=self.train,
           parent=self.iface.mainWindow())
 
         self.add_action(
-          'D:/Code/QGIS_Plugin/georec/app.png',
+          os.path.join(os.path.dirname(__file__), 'app.png'),
           text=self.tr(u'train'),
           callback=self.test,
           parent=self.iface.mainWindow())
