@@ -35,7 +35,10 @@ import xgboost as xgb
 import numpy as np
 import sklearn
 from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
+from sklearn.metrics import accuracy_score
+import matplotlib
+matplotlib.use('Qt5Agg')
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import os.path
 
 
@@ -263,36 +266,11 @@ class Georec:
       self.featIter = self.featLayer.getFeatures()
 
       self._gen_train_data()
-      self.dlg = GeorecTrainParamDlg()
-      self.dlg.show()
-      res = self.dlg.exec_()
+      self.paramDlg = GeorecTrainParamDlg()
+      self.paramDlg.show()
+      res = self.paramDlg.exec_()
       if res:
-        self.xlf = xgb.XGBRegressor(max_depth=14, 
-                        learning_rate=0.005, 
-                        n_estimators=420, 
-                        silent=True, 
-                        objective='reg:linear', 
-                        nthread=-1, 
-                        gamma=0.5,
-                        min_child_weight=1.5, 
-                        max_delta_step=1, 
-                        subsample=0.8, 
-                        colsample_bytree=0.7, 
-                        colsample_bylevel=1, 
-                        reg_alpha=0.5, 
-                        reg_lambda=1, 
-                        scale_pos_weight=1, 
-                        seed=1440, 
-                        missing=None)
-      # self.pBar = WaitProgressDialog()
-      # self.thread = TrainThread(self)
-      # cancelButton = QPushButton("Cancel")
-      # self.pBar.setCancelButton(cancelButton)
-      # cancelButton.clicked.connect(self.thread.terminate)
-      # cancelButton.setGeometry(100, 100, 100, 100)
-      # self.pBar.show() 
-      # self.thread.start()
-      self._train()
+        self._train()
 
   def test(self):
     pass
@@ -315,8 +293,39 @@ class Georec:
       self.dlg.fieldComboBox.addItem(field.name())
 
   def _train(self):
+    self.xlf = xgb.XGBRegressor(max_depth=14, 
+                    learning_rate=0.005, 
+                    n_estimators=420, 
+                    silent=True, 
+                    objective='reg:linear', 
+                    nthread=-1, 
+                    gamma=0.5,
+                    min_child_weight=1.5, 
+                    max_delta_step=1, 
+                    subsample=0.8, 
+                    colsample_bytree=0.7, 
+                    colsample_bylevel=1, 
+                    reg_alpha=0.5, 
+                    reg_lambda=1, 
+                    scale_pos_weight=1, 
+                    seed=1440, 
+                    missing=None)
+    self.pBar = WaitProgressDialog()
+    cancelButton = QPushButton("Cancel")
+    self.pBar.setCancelButton(cancelButton)
+    cancelButton.clicked.connect(self.thread.terminate)
+    cancelButton.setGeometry(100, 100, 100, 100)
+    self.pBar.show() 
+    # self.thread.start()
+    
+    # Start train
     X_train, X_test, y_train, y_test = train_test_split(self.train_data,self.target_data,test_size=0.25, random_state=33)
     bst = self.xlf.fit(X_train, y_train, eval_metric='rmse', verbose=True, eval_set = [(X_test, y_test)], early_stopping_rounds=100)
+    self.pBar.close()
+
+    # Validation 
+    y_pred = self.xlf.predict(X_test)
+    self.accuracy = accuracy_score(y_test, y_pred)
 
 class TrainThread(QThread):
   closeTrigger = pyqtSignal()
