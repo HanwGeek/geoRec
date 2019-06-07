@@ -86,7 +86,7 @@
      <number>2</number>
     </property>
     <attribute name="horizontalHeaderDefaultSectionSize">
-     <number>520</number>
+     <number>500</number>
     </attribute>
     <column>
      <property name="text">
@@ -119,7 +119,7 @@
    <property name="geometry">
     <rect>
      <x>730</x>
-     <y>680</y>
+     <y>710</y>
      <width>411</width>
      <height>31</height>
     </rect>
@@ -137,8 +137,8 @@
   <widget class="QPushButton" name="pushButton_start">
    <property name="geometry">
     <rect>
-     <x>750</x>
-     <y>740</y>
+     <x>720</x>
+     <y>750</y>
      <width>371</width>
      <height>51</height>
     </rect>
@@ -174,8 +174,8 @@
    <widget class="QSpinBox" name="spinBox_pixelSize">
     <property name="geometry">
      <rect>
-      <x>270</x>
-      <y>50</y>
+      <x>280</x>
+      <y>70</y>
       <width>381</width>
       <height>31</height>
      </rect>
@@ -199,8 +199,8 @@
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>90</y>
+      <x>20</x>
+      <y>110</y>
       <width>151</width>
       <height>31</height>
      </rect>
@@ -218,8 +218,8 @@
    <widget class="QLineEdit" name="lineEdit_output">
     <property name="geometry">
      <rect>
-      <x>170</x>
-      <y>90</y>
+      <x>180</x>
+      <y>110</y>
       <width>361</width>
       <height>41</height>
      </rect>
@@ -234,8 +234,8 @@
    <widget class="QPushButton" name="pushButton_output">
     <property name="geometry">
      <rect>
-      <x>540</x>
-      <y>90</y>
+      <x>550</x>
+      <y>110</y>
       <width>111</width>
       <height>41</height>
      </rect>
@@ -253,8 +253,8 @@
    <widget class="QLabel" name="label_pixelSize">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>40</y>
+      <x>20</x>
+      <y>60</y>
       <width>251</width>
       <height>51</height>
      </rect>
