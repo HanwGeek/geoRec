@@ -30,7 +30,6 @@ from PyQt5.QtWidgets import *
 # Initialize Qt resources from file resources.py
 from .resources import *
 # Import the code for the dialog
-from .georec_dialog import GeorecDialog
 from .ExtractToPoints_dialog import *
 import os.path
 from .IDW_Interpolation_dialog import IDW_InterpolationDialog
@@ -192,6 +191,7 @@ class Georec:
 
         # will be set False in run()
         self.first_start = True
+        QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
@@ -200,25 +200,6 @@ class Georec:
                 self.tr(u'&Geo Rec'),
                 action)
             self.iface.removeToolBarIcon(action)
-
-    def run(self):
-        """Run method that performs all the real work"""
-
-        # Create the dialog with elements (after translation) and keep reference
-        # Only create GUI ONCE in callback, so that it will only load when the plugin is started
-        if self.first_start == True:
-            self.first_start = False
-            self.dlg = GeorecDialog()
-
-        # show the dialog
-        self.dlg.show()
-        # Run the dialog event loop
-        result = self.dlg.exec_()
-        # See if OK was pressed
-        if result:
-            # Do something useful here - delete the line containing pass and
-            # substitute with your code.
-            pass
 
     def vector_to_raster(self):
         if self.first_start == True:
@@ -239,11 +220,7 @@ class Georec:
         self.dlg.pushButton_output.clicked.connect(self.choose_output_directory)
         # Run the dialog event loop
         result = self.dlg.exec_()
-        # See if OK was pressed
-        if result:
-            # Do something useful here - delete the line containing pass and
-            # substitute with your code.
-            pass
+
     def init_input(self):
         self.dlg.comboBox_layers.clear()
         self.dlg.tableWidget_attributes.setRowCount(0)
