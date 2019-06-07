@@ -21,16 +21,20 @@
  *                                                                         *
  ***************************************************************************/
 """
-from PyQt5.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QAction
+from qgis.gui import *
+from qgis.core import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 
 # Initialize Qt resources from file resources.py
 from .resources import *
 # Import the code for the dialog
 from .georec_dialog import GeorecDialog
 import os.path
-
+from .IDW_Interpolation_dialog import IDW_InterpolationDialog
+from .interpolation import Interpolation
+from PyQt5.Qt import QMessageBox
 
 class Georec:
     """QGIS Plugin Implementation."""
@@ -216,8 +220,171 @@ class Georec:
             pass
 
     def vector_to_raster(self):
-      pass
-
+        if self.first_start == True:
+            self.first_start = False
+            self.dlg = IDW_InterpolationDialog()
+            self.interpolation = Interpolation()
+        # show the dialog
+        self.dlg.show()
+        #init the dialog
+        self.init_input()
+        
+        self.insert_layers_into_combobox(self.dlg.comboBox_layers)
+        self.insert_attributes_into_table()
+          
+        #connect signals and slots 
+        self.dlg.pushButton_start.clicked.connect(self.start_interpolation)
+        self.dlg.comboBox_layers.currentIndexChanged.connect(self.insert_attributes_into_table)
+        self.dlg.pushButton_output.clicked.connect(self.choose_output_directory)
+        # Run the dialog event loop
+        result = self.dlg.exec_()
+        # See if OK was pressed
+        if result:
+            # Do something useful here - delete the line containing pass and
+            # substitute with your code.
+            pass
+    def init_input(self):
+        self.dlg.comboBox_layers.clear()
+        self.dlg.tableWidget_attributes.setRowCount(0)
+        self.dlg.lineEdit_output.setText("")
+        self.dlg.spinBox_pixelSize.setValue(0)
+        self.dlg.progressBar.setValue(0)
+            
+    def insert_layers_into_combobox(self, combobox):
+        """Populate the layer-combobox during start of the plugin."""
+        combobox.clear()
+        self.populate_layer_list(self.iface, combobox)
+    
+    def populate_layer_list(self, iface, combobox):
+        #populate the instance variable
+        self.layers= [layer for layer in QgsProject.instance().mapLayers().values()] 
+        
+        #populate the combobox
+        for layer in self.layers:
+            combobox.addItem(layer.name())   
+        
+    def insert_attributes_into_table(self):
+        """Populate the table with the attributes of the selected layer."""
+        self.dlg.tableWidget_attributes.setRowCount(0)
+        self.populate_attribute_list(self.dlg.comboBox_layers.currentText(), self.dlg.tableWidget_attributes)
+        
+    def populate_attribute_list(self, layername, table):
+        #clear the table
+        table.clearSpans()
+        
+        #find the selected layer
+        for layer in self.layers:
+            if layer.name() == layername:
+                #get all fields/attributes of the selected layer
+                fields = layer.fields()
+                fieldnames = [field.name() for field in fields]
+                
+                #populate the table
+                for fieldname in fieldnames:
+                    current_row = table.rowCount()
+                    table.insertRow(current_row)
+                    table.setRowCount(current_row + 1)
+                    
+                    #insert name of the attribute
+                    table.setItem(current_row, 1, QTableWidgetItem(fieldname))
+                
+                    #insert the chechbox
+                    checkbox_item = QTableWidgetItem()
+                    checkbox_item.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
+                    checkbox_item.setCheckState(Qt.Unchecked)
+                    table.setItem(current_row, 0, QTableWidgetItem(checkbox_item))
+                break
+       
+    def choose_output_directory(self):
+        """Opens a file dialog to choose a directory for storing the output of this plugin."""
+        #load settings
+        s = QSettings()
+        output_from_settings = str(s.value("qgis_batch-interpolation_output", ""))
+        
+        #open file dialog and store the selected path in the settings
+        filename = QFileDialog.getExistingDirectory(self.dlg, "Select Output Directory", output_from_settings, QFileDialog.ShowDirsOnly)
+        self.dlg.lineEdit_output.setText(filename)
+        s.setValue("qgis_batch-interpolation_output", filename)
+         
+    def start_interpolation(self):
+        """Start the interpolation."""
+        #store infomration in the settings
+        s = QSettings()
+        s.setValue("qgis_batch-interpolation_output", self.dlg.lineEdit_output.text())
+        #QMessageBox.about(None,"sss","1")
+        
+        #check whether an output path is inserted
+        if self.dlg.lineEdit_output.text() == "":
+            self.iface.messageBar().pushMessage("Info", "No directory choosed for storing the output.")
+            return True
+        
+        #check whether the pixel size is unequal 0
+        if self.dlg.spinBox_pixelSize.value() == 0:
+            self.iface.messageBar().pushMessage("Info", "The pixel size of the resulting raster layer has to be unequal 0.")
+            return True
+        
+        #call the start-method
+        try:
+            #QMessageBox.about(None,"sss","2")
+            table=self.dlg.tableWidget_attributes
+            layer_name=self.dlg.comboBox_layers.currentText()
+            out_dir=self.dlg.lineEdit_output.text()
+            resolution=self.dlg.spinBox_pixelSize.value()
+            pb=self.dlg.progressBar
+            gb_input=self.dlg.groupBox_input
+            gb_settings=self.dlg.groupBox_setting
+            self.start_batch_process(table, layer_name, out_dir, resolution, pb, gb_input, gb_settings)
+            #QMessageBox.about(None,"sss","6")
+        except:
+            self.iface.messageBar().pushMessage("Error", "Interpolation failed. Look into the QGIS-Log and/or the python-window for the stack trace.")
+            #QgsMessageLog.logMessage(traceback.print_exc())
+    
+    def start_batch_process(self, table, layer_name, out_dir, resolution, pb, gb_input, gb_settings):
+        #QMessageBox.about(None,"sss","3")
+        #disable gui elements during processing
+        gb_input.setEnabled(False)
+        gb_settings.setEnabled(False)
+        
+        #init the progressbar
+        pb.setValue(0)
+        max = 0
+        
+        for row in range(0, table.rowCount()):
+            if table.item(row, 0).checkState() == Qt.Checked:
+                max += 1
+    
+        pb.setMaximum(max)
+        
+        QApplication.processEvents()
+        
+        #get the layer with the specified name
+        layer = None
+        for layers_entry in self.layers:
+            if layers_entry.name() == layer_name:
+                layer = layers_entry
+                break
+        
+        #iterate over all rows and detect the checked rows
+        for row in range(0, table.rowCount()):
+            if table.item(row, 0).checkState() == Qt.Checked:
+                attribute = table.item(row, 1).text()
+                #get the index of the attribute
+                attr_index = 0
+                fields = layer.fields()
+                for field in fields:
+                    if field.name() == attribute:
+                        break
+                    attr_index += 1
+            
+                #interpolate the layer with the current attribute
+                self.interpolation.interpolation(layer, attr_index, attribute, out_dir, resolution)
+                pb.setValue(pb.value() + 1)
+                QApplication.processEvents()
+        
+        #enable gui elements after processing
+        gb_input.setEnabled(True)
+        gb_settings.setEnabled(True)
+    
     def raster_to_vector(self):
       pass
 
