@@ -29,6 +29,7 @@ from PyQt5.QtWidgets import QAction
 from .resources import *
 # Import the code for the dialog
 from .georec_dialog import GeorecDialog
+from .ExtractToPoints_dialog import *
 import os.path
 
 
@@ -219,8 +220,9 @@ class Georec:
       pass
 
     def raster_to_vector(self):
-      pass
-
+        dialog = ExtractToPointsDialog(self.iface)
+        dialog.exec_()
+        
     def train(self):
       pass
 
