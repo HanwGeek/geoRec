@@ -21,6 +21,7 @@
  *                                                                         *
  ***************************************************************************/
 """
+
 from qgis.gui import *
 from qgis.core import *
 from PyQt5.QtCore import *
@@ -34,7 +35,16 @@ from .ExtractToPoints_dialog import *
 import os.path
 from .IDW_Interpolation_dialog import IDW_InterpolationDialog
 from .interpolation import Interpolation
-from PyQt5.Qt import QMessageBox
+from .georec_train_dlg import GeorecTrainDlg
+from .georec_train_param_dlg import GeorecTrainParamDlg
+import xgboost as xgb
+import numpy as np
+import sklearn
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+import matplotlib
+matplotlib.use('Qt5Agg')
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 class Georec:
     """QGIS Plugin Implementation."""
@@ -368,7 +378,120 @@ class Georec:
         dialog.exec_()
         
     def train(self):
-      pass
+    # Create the dialog with elements (after translation) and keep reference
+    # Only create GUI ONCE in callback, so that it will only load when the plugin is started
+    if self.first_start == True:
+        self.first_start = False
+        self.dlg = GeorecTrainDlg()
 
-    def test(self):
-      pass
+    # Init params
+    self.dlg.layerComboBox.clear()
+    self.layers = list(QgsProject.instance().mapLayers().values())
+    for layer in self.layers:
+      if layer.type() == layer.VectorLayer:
+        self.dlg.layerComboBox.addItem(layer.name())
+
+    self.dlg.layerComboBox.currentIndexChanged.connect(self._get_layer_field)
+    self._get_layer_field()
+    # self.dlg.layerAttrView.setModel(self.model)
+    self.featMap = {}
+
+    # show the dialog
+    self.dlg.show()
+    # Run the dialog event loop
+    result = self.dlg.exec_()
+  
+    if result:
+      self.featLayer = self.layers[self.dlg.layerComboBox.currentIndex()]
+      self.target = self.dlg.fieldComboBox.currentText()
+      self.featField = [f.name() for f in self.featLayer.fields() if f.name() != self.target]
+      
+      featCount = self.featLayer.featureCount()
+      self.train_data = np.zeros([featCount, len(self.featField) + 2])
+      self.target_data = np.zeros([featCount, 1])
+      self.featIter = self.featLayer.getFeatures()
+
+      self._gen_train_data()
+      self.paramDlg = GeorecTrainParamDlg()
+      self.paramDlg.show()
+      res = self.paramDlg.exec_()
+      if res:
+        self._train()
+
+  def test(self):
+    pass
+
+  def _gen_train_data(self):
+    for idx, feat in enumerate(self.featLayer.getFeatures()):
+      geom_point = feat.geometry().asPoint()
+      self.train_data[idx][0] = geom_point.x()
+      self.train_data[idx][1] = geom_point.y()
+      for i, attr in enumerate(self.featField):
+        if isinstance(feat[attr], str):
+          self.train_data[idx][i + 2] = 0
+        else:
+          self.train_data[idx][i + 2] = feat[attr]
+      self.target_data[idx] = feat[self.target]
+
+  def _get_layer_field(self):
+    self.dlg.fieldComboBox.clear()
+    for field in self.layers[self.dlg.layerComboBox.currentIndex()].fields():
+      self.dlg.fieldComboBox.addItem(field.name())
+
+  def _train(self):
+    self.xlf = xgb.XGBRegressor(max_depth=14, 
+                    learning_rate=0.005, 
+                    n_estimators=420, 
+                    silent=True, 
+                    objective='reg:linear', 
+                    nthread=-1, 
+                    gamma=0.5,
+                    min_child_weight=1.5, 
+                    max_delta_step=1, 
+                    subsample=0.8, 
+                    colsample_bytree=0.7, 
+                    colsample_bylevel=1, 
+                    reg_alpha=0.5, 
+                    reg_lambda=1, 
+                    scale_pos_weight=1, 
+                    seed=1440, 
+                    missing=None)
+    self.pBar = WaitProgressDialog()
+    cancelButton = QPushButton("Cancel")
+    self.pBar.setCancelButton(cancelButton)
+    cancelButton.clicked.connect(self.thread.terminate)
+    cancelButton.setGeometry(100, 100, 100, 100)
+    self.pBar.show() 
+    # self.thread.start()
+    
+    # Start train
+    X_train, X_test, y_train, y_test = train_test_split(self.train_data,self.target_data,test_size=0.25, random_state=33)
+    bst = self.xlf.fit(X_train, y_train, eval_metric='rmse', verbose=True, eval_set = [(X_test, y_test)], early_stopping_rounds=100)
+    self.pBar.close()
+
+    # Validation 
+    y_pred = self.xlf.predict(X_test)
+    self.accuracy = accuracy_score(y_test, y_pred)
+
+class TrainThread(QThread):
+  closeTrigger = pyqtSignal()
+  def __init__(self, rec, parent=None):
+    super(TrainThread, self).__init__(parent)
+    self.rec = rec
+    self.closeTrigger.connect(self.rec.pBar.close)
+
+  def __del__(self):
+    self.wait()
+
+  def run(self):
+    print("----- thread start -----")
+    self.rec._train()
+    self.closeTrigger.emit()
+
+class WaitProgressDialog(QProgressDialog):
+  def __init__(self, parent=None):
+    super(WaitProgressDialog, self).__init__(parent)
+    self.setMaximum(0)
+    self.setMinimum(0)
+    self.setWindowTitle("Training... ")
+    self.setFixedSize(400, 100)
