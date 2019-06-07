@@ -31,6 +31,7 @@ from PyQt5.QtWidgets import *
 from .resources import *
 # Import the code for the dialog
 from .georec_dialog import GeorecDialog
+from .ExtractToPoints_dialog import *
 import os.path
 from .IDW_Interpolation_dialog import IDW_InterpolationDialog
 from .interpolation import Interpolation
@@ -386,8 +387,9 @@ class Georec:
         gb_settings.setEnabled(True)
     
     def raster_to_vector(self):
-      pass
-
+        dialog = ExtractToPointsDialog(self.iface)
+        dialog.exec_()
+        
     def train(self):
       pass
 
