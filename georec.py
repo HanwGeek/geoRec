@@ -31,11 +31,15 @@ from .resources import *
 # Import the code for the dialog
 from .georec_train_dlg import GeorecTrainDlg
 from .georec_train_param_dlg import GeorecTrainParamDlg
+from .georec_test_dlg import GeorecTestDlg
 import xgboost as xgb
+from xgboost import plot_tree
 import numpy as np
 import sklearn
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import explained_variance_score
+import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -195,6 +199,8 @@ class Georec:
         callback=self.test,
         parent=self.iface.mainWindow())
 
+      self.figure = plt.figure()
+      self.canvas = FigureCanvas(self.figure)
       # will be set False in run()
       self.first_start = True
 
@@ -205,25 +211,6 @@ class Georec:
               self.tr(u'&Geo Rec'),
               action)
           self.iface.removeToolBarIcon(action)
-
-  def run(self):
-      """Run method that performs all the real work"""
-
-      # Create the dialog with elements (after translation) and keep reference
-      # Only create GUI ONCE in callback, so that it will only load when the plugin is started
-      if self.first_start == True:
-          self.first_start = False
-          self.dlg = GeorecDialog()
-
-      # show the dialog
-      self.dlg.show()
-      # Run the dialog event loop
-      result = self.dlg.exec_()
-      # See if OK was pressed
-      if result:
-          # Do something useful here - delete the line containing pass and
-          # substitute with your code.
-          pass
 
   def vector_to_raster(self):
     pass
@@ -272,6 +259,21 @@ class Georec:
       if res:
         self._train()
 
+        self.testDlg = GeorecTestDlg()
+        self.testDlg.editAcc.setText(str(self.accuracy)[:6])
+        self.testDlg.layout.addWidget(self.canvas)
+
+        from xgboost import plot_importance
+        os.environ["PATH"] += os.pathsep + 'D:/Code/graphviz/bin'
+        
+        ax = self.figure.add_axes([0.1,0.1,0.8,0.8])
+        fig = plot_importance(self.xlf, ax=ax)
+
+        self.canvas.draw()
+        self.testDlg.editAcc.setFocusPolicy(QtCore.Qt.NoFocus)
+        self.testDlg.show()
+        self.testDlg.exec_()
+
   def test(self):
     pass
 
@@ -313,7 +315,7 @@ class Georec:
     self.pBar = WaitProgressDialog()
     cancelButton = QPushButton("Cancel")
     self.pBar.setCancelButton(cancelButton)
-    cancelButton.clicked.connect(self.thread.terminate)
+    # cancelButton.clicked.connect(self.thread.terminate)
     cancelButton.setGeometry(100, 100, 100, 100)
     self.pBar.show() 
     # self.thread.start()
@@ -325,7 +327,12 @@ class Georec:
 
     # Validation 
     y_pred = self.xlf.predict(X_test)
-    self.accuracy = accuracy_score(y_test, y_pred)
+    self.accuracy = explained_variance_score(y_test, y_pred)
+
+  def _draw(self):
+    ax = self.figure.add_axes([0.1,0.1,0.8,0.8])
+    ax.plot([1,2,3,4,5])
+    self.canvas.draw()
 
 class TrainThread(QThread):
   closeTrigger = pyqtSignal()
