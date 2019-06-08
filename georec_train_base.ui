@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>882</width>
-    <height>355</height>
+    <width>288</width>
+    <height>172</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,16 +16,16 @@
   <widget class="QDialogButtonBox" name="button_box">
    <property name="geometry">
     <rect>
-     <x>290</x>
-     <y>260</y>
-     <width>311</width>
-     <height>51</height>
+     <x>50</x>
+     <y>140</y>
+     <width>171</width>
+     <height>21</height>
     </rect>
    </property>
    <property name="font">
     <font>
      <family>Source Code Variable</family>
-     <pointsize>14</pointsize>
+     <pointsize>9</pointsize>
     </font>
    </property>
    <property name="orientation">
@@ -38,71 +38,71 @@
   <widget class="QComboBox" name="layerComboBox">
    <property name="geometry">
     <rect>
-     <x>40</x>
-     <y>70</y>
-     <width>791</width>
-     <height>41</height>
+     <x>20</x>
+     <y>40</y>
+     <width>251</width>
+     <height>21</height>
     </rect>
    </property>
    <property name="font">
     <font>
      <family>Source Code Variable</family>
-     <pointsize>14</pointsize>
+     <pointsize>9</pointsize>
     </font>
    </property>
   </widget>
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>40</x>
+     <x>30</x>
      <y>10</y>
-     <width>811</width>
-     <height>51</height>
+     <width>231</width>
+     <height>21</height>
     </rect>
    </property>
    <property name="font">
     <font>
      <family>Source Code Variable</family>
-     <pointsize>14</pointsize>
+     <pointsize>9</pointsize>
     </font>
    </property>
    <property name="text">
-    <string>Choose the input feature layer data:</string>
+    <string>Choose the input feature layer data</string>
    </property>
   </widget>
   <widget class="QComboBox" name="fieldComboBox">
    <property name="geometry">
     <rect>
-     <x>40</x>
-     <y>190</y>
-     <width>791</width>
-     <height>41</height>
+     <x>20</x>
+     <y>100</y>
+     <width>251</width>
+     <height>21</height>
     </rect>
    </property>
    <property name="font">
     <font>
      <family>Source Code Variable</family>
-     <pointsize>14</pointsize>
+     <pointsize>9</pointsize>
     </font>
    </property>
   </widget>
   <widget class="QLabel" name="label_2">
    <property name="geometry">
     <rect>
-     <x>40</x>
-     <y>130</y>
-     <width>731</width>
-     <height>51</height>
+     <x>30</x>
+     <y>70</y>
+     <width>231</width>
+     <height>21</height>
     </rect>
    </property>
    <property name="font">
     <font>
      <family>Source Code Variable</family>
-     <pointsize>14</pointsize>
+     <pointsize>9</pointsize>
     </font>
    </property>
    <property name="text">
-    <string>Choose the train target field:</string>
+    <string>Choose the train target field</string>
    </property>
   </widget>
  </widget>

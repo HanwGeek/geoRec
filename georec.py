@@ -206,6 +206,9 @@ class Georec:
         # will be set False in run()
         self.first_start = True
         QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
+        
+        self.figure = plt.figure(facecolor='#F0F0F0') #可选参数,facecolor为背景颜色
+        self.canvas = FigureCanvas(self.figure)
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
@@ -218,29 +221,29 @@ class Georec:
     def vector_to_raster(self):
         if self.first_start == True:
             self.first_start = False
-            self.dlg = IDW_InterpolationDialog()
-            self.interpolation = Interpolation()
+        self.dlg1 = IDW_InterpolationDialog()
+        self.interpolation = Interpolation()
         # show the dialog
-        self.dlg.show()
+        self.dlg1.show()
         #init the dialog
         self.init_input()
         
-        self.insert_layers_into_combobox(self.dlg.comboBox_layers)
+        self.insert_layers_into_combobox(self.dlg1.comboBox_layers)
         self.insert_attributes_into_table()
           
         #connect signals and slots 
-        self.dlg.pushButton_start.clicked.connect(self.start_interpolation)
-        self.dlg.comboBox_layers.currentIndexChanged.connect(self.insert_attributes_into_table)
-        self.dlg.pushButton_output.clicked.connect(self.choose_output_directory)
+        self.dlg1.pushButton_start.clicked.connect(self.start_interpolation)
+        self.dlg1.comboBox_layers.currentIndexChanged.connect(self.insert_attributes_into_table)
+        self.dlg1.pushButton_output.clicked.connect(self.choose_output_directory)
         # Run the dialog event loop
-        result = self.dlg.exec_()
+        result = self.dlg1.exec_()
 
     def init_input(self):
-        self.dlg.comboBox_layers.clear()
-        self.dlg.tableWidget_attributes.setRowCount(0)
-        self.dlg.lineEdit_output.setText("")
-        self.dlg.spinBox_pixelSize.setValue(0)
-        self.dlg.progressBar.setValue(0)
+        self.dlg1.comboBox_layers.clear()
+        self.dlg1.tableWidget_attributes.setRowCount(0)
+        self.dlg1.lineEdit_output.setText("")
+        self.dlg1.spinBox_pixelSize.setValue(0)
+        self.dlg1.progressBar.setValue(0)
             
     def insert_layers_into_combobox(self, combobox):
         """Populate the layer-combobox during start of the plugin."""
@@ -257,8 +260,8 @@ class Georec:
         
     def insert_attributes_into_table(self):
         """Populate the table with the attributes of the selected layer."""
-        self.dlg.tableWidget_attributes.setRowCount(0)
-        self.populate_attribute_list(self.dlg.comboBox_layers.currentText(), self.dlg.tableWidget_attributes)
+        self.dlg1.tableWidget_attributes.setRowCount(0)
+        self.populate_attribute_list(self.dlg1.comboBox_layers.currentText(), self.dlg1.tableWidget_attributes)
         
     def populate_attribute_list(self, layername, table):
         #clear the table
@@ -294,37 +297,37 @@ class Georec:
         output_from_settings = str(s.value("qgis_batch-interpolation_output", ""))
         
         #open file dialog and store the selected path in the settings
-        filename = QFileDialog.getExistingDirectory(self.dlg, "Select Output Directory", output_from_settings, QFileDialog.ShowDirsOnly)
-        self.dlg.lineEdit_output.setText(filename)
+        filename = QFileDialog.getExistingDirectory(self.dlg1, "Select Output Directory", output_from_settings, QFileDialog.ShowDirsOnly)
+        self.dlg1.lineEdit_output.setText(filename)
         s.setValue("qgis_batch-interpolation_output", filename)
          
     def start_interpolation(self):
         """Start the interpolation."""
         #store infomration in the settings
         s = QSettings()
-        s.setValue("qgis_batch-interpolation_output", self.dlg.lineEdit_output.text())
+        s.setValue("qgis_batch-interpolation_output", self.dlg1.lineEdit_output.text())
         #QMessageBox.about(None,"sss","1")
         
         #check whether an output path is inserted
-        if self.dlg.lineEdit_output.text() == "":
+        if self.dlg1.lineEdit_output.text() == "":
             self.iface.messageBar().pushMessage("Info", "No directory choosed for storing the output.")
             return True
         
         #check whether the pixel size is unequal 0
-        if self.dlg.spinBox_pixelSize.value() == 0:
+        if self.dlg1.spinBox_pixelSize.value() == 0:
             self.iface.messageBar().pushMessage("Info", "The pixel size of the resulting raster layer has to be unequal 0.")
             return True
         
         #call the start-method
         try:
             #QMessageBox.about(None,"sss","2")
-            table=self.dlg.tableWidget_attributes
-            layer_name=self.dlg.comboBox_layers.currentText()
-            out_dir=self.dlg.lineEdit_output.text()
-            resolution=self.dlg.spinBox_pixelSize.value()
-            pb=self.dlg.progressBar
-            gb_input=self.dlg.groupBox_input
-            gb_settings=self.dlg.groupBox_setting
+            table=self.dlg1.tableWidget_attributes
+            layer_name=self.dlg1.comboBox_layers.currentText()
+            out_dir=self.dlg1.lineEdit_output.text()
+            resolution=self.dlg1.spinBox_pixelSize.value()
+            pb=self.dlg1.progressBar
+            gb_input=self.dlg1.groupBox_input
+            gb_settings=self.dlg1.groupBox_setting
             self.start_batch_process(table, layer_name, out_dir, resolution, pb, gb_input, gb_settings)
             #QMessageBox.about(None,"sss","6")
         except:
@@ -386,7 +389,7 @@ class Georec:
     # Only create GUI ONCE in callback, so that it will only load when the plugin is started
       if self.first_start == True:
           self.first_start = False
-          self.dlg = GeorecTrainDlg()
+      self.dlg = GeorecTrainDlg()
 
       # Init params
       self.dlg.layerComboBox.clear()
@@ -397,7 +400,7 @@ class Georec:
 
       self.dlg.layerComboBox.currentIndexChanged.connect(self._get_layer_field)
       self._get_layer_field()
-      # self.dlg.layerAttrView.setModel(self.model)
+      #self.dlg.layerAttrView.setModel(self.model)
       self.featMap = {}
 
       # show the dialog
@@ -427,7 +430,7 @@ class Georec:
           self.testDlg.layout.addWidget(self.canvas)
 
           from xgboost import plot_importance
-          os.environ["PATH"] += os.pathsep + 'D:/Code/graphviz/bin'
+          os.environ["PATH"] += os.pathsep + 'E:\qgis3.2\graphviz-2.38\release\bin'
           
           ax = self.figure.add_axes([0.1,0.1,0.8,0.8])
           fig = plot_importance(self.xlf, ax=ax)
