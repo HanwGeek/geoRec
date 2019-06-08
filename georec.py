@@ -37,7 +37,8 @@ from .IDW_Interpolation_dialog import IDW_InterpolationDialog
 from .interpolation import Interpolation
 from .georec_train_dlg import GeorecTrainDlg
 from .georec_train_param_dlg import GeorecTrainParamDlg
-from .georec_test_dlg import GeorecTestDlg
+from .georec_res_dlg import GeorecResDlg
+from .georec_app_dlg import GeorecAppDlg
 import xgboost as xgb
 from xgboost import plot_tree
 import numpy as np
@@ -199,14 +200,13 @@ class Georec:
 
         self.add_action(
           os.path.join(os.path.dirname(__file__), 'app.png'),
-          text=self.tr(u'train'),
-          callback=self.test,
+          text=self.tr(u'Application'),
+          callback=self.app,
           parent=self.iface.mainWindow())
 
         # will be set False in run()
         self.first_start = True
         QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
-        
         self.figure = plt.figure(facecolor='#F0F0F0') #可选参数,facecolor为背景颜色
         self.canvas = FigureCanvas(self.figure)
 
@@ -385,8 +385,6 @@ class Georec:
         dialog.exec_()
         
     def train(self):
-    # Create the dialog with elements (after translation) and keep reference
-    # Only create GUI ONCE in callback, so that it will only load when the plugin is started
       if self.first_start == True:
           self.first_start = False
       self.dlg = GeorecTrainDlg()
@@ -425,7 +423,7 @@ class Georec:
         if res:
           self._train()
 
-          self.testDlg = GeorecTestDlg()
+          self.testDlg = GeorecResDlg()
           self.testDlg.editAcc.setText(str(self.accuracy)[:6])
           self.testDlg.layout.addWidget(self.canvas)
 
@@ -440,9 +438,48 @@ class Georec:
           self.testDlg.show()
           self.testDlg.exec_()
 
-    def test(self):
-      pass
+    def app(self):
+      # Init gui
+      if self.first_start == True:
+        self.first_start = False
+        
 
+      # Init params
+      self.appDlg = GeorecAppDlg()
+      self.appDlg.layerComboBox.clear()
+      self.layers = list(QgsProject.instance().mapLayers().values())
+      for layer in self.layers:
+        if layer.type() == layer.VectorLayer:
+          self.appDlg.layerComboBox.addItem(layer.name())
+
+      self.appDlg.show()
+      # Run the dialog event loop
+      result = self.appDlg.exec_()
+  
+      if result:
+        self.appLayer = self.layers[self.appDlg.layerComboBox.currentIndex()]
+        self.app_data = np.zeros([self.appLayer.featureCount(), len(self.featField) + 2])
+
+        self._gen_app_data()
+        self.pred = self.xlf.predict(self.app_data)
+
+        scoreField = QgsField()
+        scoreField.setName('Score')
+        scoreField.setType(QVariant.Double)
+        self.appLayer.startEditing()
+        self.appLayer.addAttribute(scoreField)
+        self.appLayer.commitChanges()
+
+        self.appLayer.startEditing()
+        fieldIdx = len(self.featField)
+        featIter = self.appLayer.getFeatures()
+        for idx, feat in enumerate(featIter):
+
+          self.appLayer.changeAttributeValue(feat.id(), fieldIdx, float(pred[idx]))
+        
+        print(self.appLayer.commitChanges())
+
+    
     def _gen_train_data(self):
       for idx, feat in enumerate(self.featLayer.getFeatures()):
         geom_point = feat.geometry().asPoint()
@@ -459,6 +496,17 @@ class Georec:
       self.dlg.fieldComboBox.clear()
       for field in self.layers[self.dlg.layerComboBox.currentIndex()].fields():
         self.dlg.fieldComboBox.addItem(field.name())
+
+    def _gen_app_data(self):
+      for idx, feat in enumerate(self.appLayer.getFeatures()):
+        geom_point = feat.geometry().asPoint()
+        self.app_data[idx][0] = geom_point.x()
+        self.app_data[idx][1] = geom_point.y()
+        for i, attr in enumerate(self.featField):
+          if isinstance(feat[attr], str):
+            self.app_data[idx][i + 2] = 0
+          else:
+            self.app_data[idx][i + 2] = feat[attr]
 
     def _train(self):
       self.xlf = xgb.XGBRegressor(max_depth=14, 
@@ -490,7 +538,7 @@ class Georec:
       X_train, X_test, y_train, y_test = train_test_split(self.train_data,self.target_data,test_size=0.25, random_state=33)
       bst = self.xlf.fit(X_train, y_train, eval_metric='rmse', verbose=True, eval_set = [(X_test, y_test)], early_stopping_rounds=100)
       self.pBar.close()
-
+      
       # Validation 
       y_pred = self.xlf.predict(X_test)
       self.accuracy = explained_variance_score(y_test, y_pred)
@@ -499,6 +547,21 @@ class TrainThread(QThread):
   closeTrigger = pyqtSignal()
   def __init__(self, rec, parent=None):
     super(TrainThread, self).__init__(parent)
+    self.rec = rec
+    self.closeTrigger.connect(self.rec.pBar.close)
+
+  def __del__(self):
+    self.wait()
+
+  def run(self):
+    print("----- thread start -----")
+    self.rec._train()
+    self.closeTrigger.emit()
+
+class AppThread(QThread):
+  closeTrigger = pyqtSignal()
+  def __init__(self, rec, parent=None):
+    super(AppThread, self).__init__(parent)
     self.rec = rec
     self.closeTrigger.connect(self.rec.pBar.close)
 
