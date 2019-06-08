@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1019</width>
-    <height>883</height>
+    <width>479</width>
+    <height>592</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,24 +17,18 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>100</y>
-     <width>1001</width>
-     <height>551</height>
+     <y>70</y>
+     <width>451</width>
+     <height>361</height>
     </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Source Code Variable</family>
-     <pointsize>14</pointsize>
-    </font>
    </property>
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>20</x>
       <y>10</y>
-      <width>961</width>
-      <height>51</height>
+      <width>352</width>
+      <height>21</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -43,12 +37,6 @@
       <verstretch>0</verstretch>
      </sizepolicy>
     </property>
-    <property name="font">
-     <font>
-      <family>Source Code Variable</family>
-      <pointsize>14</pointsize>
-     </font>
-    </property>
     <property name="text">
      <string>Layers with fields/bands to get values from:</string>
     </property>
@@ -56,17 +44,11 @@
    <widget class="QListWidget" name="SourceField">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>60</y>
-      <width>971</width>
-      <height>251</height>
+      <x>20</x>
+      <y>40</y>
+      <width>421</width>
+      <height>171</height>
      </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Source Code Variable</family>
-      <pointsize>14</pointsize>
-     </font>
     </property>
     <property name="cursor" stdset="0">
      <cursorShape>ArrowCursor</cursorShape>
@@ -84,17 +66,11 @@
    <widget class="QTableWidget" name="FieldsTable">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>330</y>
-      <width>971</width>
-      <height>211</height>
+      <x>20</x>
+      <y>220</y>
+      <width>421</width>
+      <height>131</height>
      </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Source Code Variable</family>
-      <pointsize>14</pointsize>
-     </font>
     </property>
     <property name="autoScrollMargin">
      <number>16</number>
@@ -130,7 +106,7 @@
      <number>2</number>
     </property>
     <attribute name="horizontalHeaderDefaultSectionSize">
-     <number>480</number>
+     <number>209</number>
     </attribute>
     <attribute name="horizontalHeaderMinimumSectionSize">
      <number>31</number>
@@ -152,29 +128,22 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>991</width>
+     <width>451</width>
      <height>80</height>
     </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Source Code Variable</family>
-     <pointsize>14</pointsize>
-    </font>
    </property>
    <widget class="QLabel" name="label_1">
     <property name="geometry">
      <rect>
       <x>20</x>
       <y>20</y>
-      <width>421</width>
-      <height>41</height>
+      <width>151</width>
+      <height>33</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <family>Source Code Variable</family>
-      <pointsize>14</pointsize>
+      <pointsize>9</pointsize>
      </font>
     </property>
     <property name="text">
@@ -184,49 +153,31 @@
    <widget class="QComboBox" name="TargetLayer">
     <property name="geometry">
      <rect>
-      <x>450</x>
+      <x>190</x>
       <y>20</y>
-      <width>531</width>
-      <height>41</height>
+      <width>251</width>
+      <height>31</height>
      </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Source Code Variable</family>
-      <pointsize>14</pointsize>
-     </font>
     </property>
    </widget>
   </widget>
   <widget class="QWidget" name="widget_3" native="true">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>660</y>
-     <width>981</width>
-     <height>161</height>
+     <x>10</x>
+     <y>430</y>
+     <width>451</width>
+     <height>121</height>
     </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Source Code Variable</family>
-     <pointsize>14</pointsize>
-    </font>
    </property>
    <widget class="QLabel" name="label_3">
     <property name="geometry">
      <rect>
       <x>20</x>
       <y>10</y>
-      <width>421</width>
-      <height>31</height>
+      <width>171</width>
+      <height>21</height>
      </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Source Code Variable</family>
-      <pointsize>14</pointsize>
-     </font>
     </property>
     <property name="text">
      <string>Output Point Layer:</string>
@@ -236,32 +187,20 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>60</y>
-      <width>701</width>
-      <height>41</height>
+      <y>40</y>
+      <width>311</width>
+      <height>31</height>
      </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Source Code Variable</family>
-      <pointsize>14</pointsize>
-     </font>
     </property>
    </widget>
    <widget class="QToolButton" name="BrowseButton">
     <property name="geometry">
      <rect>
-      <x>740</x>
-      <y>60</y>
-      <width>221</width>
-      <height>41</height>
+      <x>340</x>
+      <y>40</y>
+      <width>101</width>
+      <height>31</height>
      </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Source Code Variable</family>
-      <pointsize>14</pointsize>
-     </font>
     </property>
     <property name="text">
      <string>Browse...</string>
@@ -271,16 +210,10 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>110</y>
+      <y>80</y>
       <width>391</width>
       <height>41</height>
      </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Source Code Variable</family>
-      <pointsize>14</pointsize>
-     </font>
     </property>
     <property name="text">
      <string>Add output layer to the map</string>
@@ -293,10 +226,10 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>360</x>
-     <y>830</y>
-     <width>291</width>
-     <height>41</height>
+     <x>140</x>
+     <y>560</y>
+     <width>193</width>
+     <height>28</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -304,12 +237,6 @@
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
-   </property>
-   <property name="font">
-    <font>
-     <family>Source Code Variable</family>
-     <pointsize>14</pointsize>
-    </font>
    </property>
    <property name="layoutDirection">
     <enum>Qt::LeftToRight</enum>
